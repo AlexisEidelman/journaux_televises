@@ -66,12 +66,20 @@ date = pd.to_datetime(date, format='%m-%y')
 data.index = pd.DatetimeIndex(date).normalize()
 del data['date']
 
-# pourcentage par sujet 
-pourcent_by_sujet = data.copy()
 Total = data['Totaux']
 del data['Totaux']
+assert all(data.sum(axis=1) == Total)
 
+# pourcentage par sujet 
+pourcent_by_sujet = data.copy()
+pourcent_by_sujet.iloc[:,1:] = pourcent_by_sujet.iloc[:,1:].divide(Total, axis=0)
 
 
 # on fait les brutes pour l'instant...
-data.to_csv('data/durees2.csv', index=False)
+
+# Tidy data operation
+tidy_data = data.reset_index()
+data = pd.melt(tidy_data, id_vars=['index','sujet'])
+data.columns = ['date', 'sujet', 'chaine', 'temps']
+
+data.to_csv('data/durees2.csv')
